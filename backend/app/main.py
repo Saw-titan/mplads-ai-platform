@@ -10,6 +10,7 @@ root_dir = os.path.dirname(backend_dir)
 for d in [backend_dir, root_dir]:
     if d not in sys.path:
         sys.path.insert(0, d)
+#importing libs
 
 
 from app.database import init_db, AsyncSessionLocal
