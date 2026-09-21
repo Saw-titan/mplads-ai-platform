@@ -1,0 +1,16 @@
+{
+  "name": "mplads-ai-platform-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently --names \"BACKEND,FRONTEND\" --prefix-colors \"cyan.bold,magenta.bold\" \"npm run backend\" \"npm run frontend\"",
+    "backend": "cd backend && C:\\Users\\ayush\\AppData\\Roaming\\Python\\Python313\\Scripts\\uvicorn.exe app.main:app --reload --host 0.0.0.0 --port 8000",
+    "frontend": "cd frontend && npm run dev",
+    "build": "cd frontend && npm install && node node_modules/vite/bin/vite.js build",
+    "seed": "C:\\Python313\\python.exe scripts/seed_db.py",
+    "install:all": "cd frontend && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
