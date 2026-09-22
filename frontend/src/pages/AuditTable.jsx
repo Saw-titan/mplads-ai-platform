@@ -19,6 +19,7 @@ import {
   uploadEvidence,
   recordProjectView
 } from '../services/api';
+import { useToast } from '../components/Toast';
 
 const SIH_WEIGHTS = [
   { key: 'cost_score', label: 'Cost', weight: '30%' },
@@ -31,6 +32,7 @@ const SIH_WEIGHTS = [
 const AuditTable = () => {
   const { refreshKey, activeRole } = useOutletContext();
   const [searchParams] = useSearchParams();
+  const toast = useToast();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -169,6 +171,7 @@ const AuditTable = () => {
     if (!selectedProject) return;
     if (!remarks.trim()) {
       setActionMessage('Add review remarks before submitting a case action.');
+      toast.warning('Please add review remarks before submitting a case action.', 3000);
       return;
     }
     const payload = {
@@ -185,9 +188,11 @@ const AuditTable = () => {
       else if (kind === 'dismiss') updated = await dismissAnomaly(selectedProject.id, payload);
       else if (kind === 'resolve') updated = await resolveCase(selectedProject.id, payload);
       setActionMessage(`Case updated to ${updated.review_status}. Hash-chained audit record created.`);
+      toast.success(`Case updated to ${updated.review_status}! Cryptographic hash chain recorded.`, 3000);
       await refreshSelected(updated);
     } catch (err) {
       setActionMessage('Action failed. Check API connectivity.');
+      toast.error('Case action failed. Please check server connectivity.', 3000);
     } finally {
       setActionBusy(false);
     }
@@ -225,14 +230,40 @@ const AuditTable = () => {
 
   return (
     <div className="space-y-6 relative">
-      <div>
-        <h2 className="text-2xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
-          <AlertTriangle className="w-6 h-6 text-red-500" />
-          {top5Only ? 'Top 5% Priority Audit Queue' : 'Interactive Audit Desk'}
-        </h2>
-        <p className="text-xs text-slate-400">
-          Filter works by review status and severity, inspect SIH risk components, and complete human-in-the-loop case actions. Language is forensic: anomaly detected / requires review.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
+            <AlertTriangle className="w-6 h-6 text-red-500" />
+            {top5Only ? 'Top 5% Priority Audit Queue' : 'Interactive Audit Desk'}
+          </h2>
+          <p className="text-xs text-slate-400 mt-1">
+            Filter works by review status and severity, inspect SIH risk components, and complete human-in-the-loop case actions.
+          </p>
+        </div>
+        <button
+          onClick={() => {
+            try {
+              const csvContent = "data:text/csv;charset=utf-8," +
+                ["Code,Title,District,MP,Sanctioned,Expenditure,Severity,Risk Score",
+                  ...projects.map(p => `"${p.project_code}","${p.title}","${p.district_name}","${p.mp_name}",${p.sanctioned_amount},${p.expenditure_amount},"${p.severity}",${p.risk_score}`)
+                ].join("\n");
+              const encodedUri = encodeURI(csvContent);
+              const link = document.createElement("a");
+              link.setAttribute("href", encodedUri);
+              link.setAttribute("download", `MPLADS_Audit_Report_${new Date().toISOString().split('T')[0]}.csv`);
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              toast.success(`Exported ${projects.length} forensic audit records to CSV!`, 3000);
+            } catch (err) {
+              toast.error('Failed to export CSV report', 3000);
+            }
+          }}
+          className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 hover:text-white flex items-center gap-2 transition-all"
+        >
+          <Hash className="w-3.5 h-3.5 text-cyan-400" />
+          Export Forensic CSV
+        </button>
       </div>
 
       <div className="glass-card p-4 rounded-2xl border border-slate-800 flex flex-col lg:flex-row items-center justify-between gap-4">

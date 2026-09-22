@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Database, RefreshCw, UserCheck, Search, Bell, CheckCircle2, ShieldAlert, AlertTriangle, Check, CheckCheck, ExternalLink } from 'lucide-react';
+import { Database, RefreshCw, UserCheck, Search, Bell, CheckCircle2, ShieldAlert, AlertTriangle, Check, CheckCheck, ExternalLink, Languages } from 'lucide-react';
 import { seedDatabase, getNotifications, markNotificationRead, markAllNotificationsRead, setApiRoleHeader, loginWithRole } from '../services/api';
+import { useToast } from './Toast';
 
-const Navbar = ({ activeRole, setActiveRole, onDatabaseReseeded, onSelectProject }) => {
+const Navbar = ({ activeRole, setActiveRole, onDatabaseReseeded, onSelectProject, language, setLanguage }) => {
   const [isSeeding, setIsSeeding] = useState(false);
   const [seedMessage, setSeedMessage] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
   const notifRef = useRef(null);
+  const toast = useToast();
 
   const roles = [
     { id: 'ADMIN', label: 'Central Admin (MoSPI)' },
@@ -52,11 +54,13 @@ const Navbar = ({ activeRole, setActiveRole, onDatabaseReseeded, onSelectProject
       setSeedMessage(null);
       const res = await seedDatabase();
       setSeedMessage(`Seeded ${res.projects_seeded} records!`);
+      toast.success(`Successfully seeded ${res.projects_seeded} MPLADS project records with synthetic anomalies!`, 4000);
       if (onDatabaseReseeded) onDatabaseReseeded();
       fetchNotifications();
       setTimeout(() => setSeedMessage(null), 4000);
     } catch (err) {
       setSeedMessage('Seeding failed');
+      toast.error('Database seeding failed. Please check backend connectivity.', 4000);
       setTimeout(() => setSeedMessage(null), 4000);
     } finally {
       setIsSeeding(false);
@@ -122,6 +126,20 @@ const Navbar = ({ activeRole, setActiveRole, onDatabaseReseeded, onSelectProject
             <CheckCircle2 className="w-3.5 h-3.5" /> {seedMessage}
           </span>
         )}
+
+        {/* Language Toggle */}
+        <button
+          onClick={() => {
+            const newLang = language === 'en' ? 'hi' : 'en';
+            setLanguage(newLang);
+            toast.success(newLang === 'hi' ? 'भाषा हिन्दी में बदली गई' : 'Language changed to English', 2000);
+          }}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-slate-200 hover:text-white transition-all"
+          title="Toggle Language / भाषा बदलें"
+        >
+          <Languages className="w-3.5 h-3.5" />
+          <span>{language === 'en' ? 'हिन्दी' : 'English'}</span>
+        </button>
 
         {/* Re-seed DB Button */}
         <button

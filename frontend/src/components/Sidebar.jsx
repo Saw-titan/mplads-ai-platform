@@ -1,38 +1,47 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, AlertTriangle, FilePlus2, ShieldAlert, Cpu, ChevronLeft, ChevronRight, Activity, Flame } from 'lucide-react';
+import { LayoutDashboard, AlertTriangle, FilePlus2, ShieldAlert, Cpu, ChevronLeft, ChevronRight, Activity, Flame, MapPin } from 'lucide-react';
+import { useTranslation } from '../i18n/translations';
 
-const Sidebar = ({ isCollapsed, toggleSidebar }) => {
+const Sidebar = ({ isCollapsed, toggleSidebar, language }) => {
   const location = useLocation();
   const isTop5View = location.pathname === '/audit' && new URLSearchParams(location.search).get('top_5_percent') === 'true';
+  const t = useTranslation(language || 'en');
 
   const navItems = [
     {
-      name: 'Executive Dashboard',
+      name: t('executiveDashboard'),
       path: '/',
       icon: LayoutDashboard,
-      badge: 'Real-time',
+      badge: t('realtime'),
       isActive: location.pathname === '/'
     },
     {
-      name: 'Top 5% High-Risk Works',
+      name: t('geospatialIntelligence'),
+      path: '/map',
+      icon: MapPin,
+      badge: t('gis'),
+      isActive: location.pathname === '/map'
+    },
+    {
+      name: t('top5HighRisk'),
       path: '/audit?top_5_percent=true',
       icon: Flame,
-      badge: 'Priority',
+      badge: t('priority'),
       isActive: isTop5View
     },
     {
-      name: 'Interactive Audit Desk',
+      name: t('auditDesk'),
       path: '/audit',
       icon: AlertTriangle,
-      badge: 'HITL',
+      badge: t('hitl'),
       isActive: location.pathname === '/audit' && !isTop5View
     },
     {
-      name: 'Live Proposal Analyzer',
+      name: t('liveAnalyzer'),
       path: '/analyzer',
       icon: FilePlus2,
-      badge: 'SIH',
+      badge: t('sih'),
       isActive: location.pathname === '/analyzer'
     }
   ];
