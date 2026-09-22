@@ -7,6 +7,7 @@ const Layout = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [activeRole, setActiveRole] = useState('ADMIN');
   const [refreshKey, setRefreshKey] = useState(0);
+  const [language, setLanguage] = useState('en');
   const navigate = useNavigate();
 
   const handleDatabaseReseeded = () => {
@@ -20,10 +21,12 @@ const Layout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex">
+    <div className="min-h-screen text-slate-100 flex relative">
+      <div className="fixed inset-0 cyber-grid pointer-events-none"></div>
       <Sidebar
         isCollapsed={isCollapsed}
         toggleSidebar={() => setIsCollapsed(!isCollapsed)}
+        language={language}
       />
 
       <div
@@ -36,10 +39,12 @@ const Layout = () => {
           setActiveRole={setActiveRole}
           onDatabaseReseeded={handleDatabaseReseeded}
           onSelectProject={handleSelectProject}
+          language={language}
+          setLanguage={setLanguage}
         />
 
         <main className="flex-1 p-6 overflow-y-auto">
-          <Outlet context={{ activeRole, refreshKey }} />
+          <Outlet context={{ activeRole, refreshKey, language }} />
         </main>
       </div>
     </div>
